@@ -35,27 +35,26 @@ jobs:
       - name: Bikin Ulang Android Baru
         run: flutter create --project-name kythera_flutter . --platforms=android
 
-      # 4. SUNTIK NDK & MIN SDK
-      - name: Suntik NDK & Min SDK
-        run: |
-          sed -i 's/minSdkVersion .*/minSdkVersion 24/g' android/app/build.gradle
-          sed -i 's/ndkVersion .*/ndkVersion "27.0.12077973"/g' android/app/build.gradle
-
-      # 5. SUNTIK IZIN MEMORI
-      - name: Suntik Izin Memori
-        run: |
-          sed -i '/<application/i \    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>\n    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>\n    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"/>\n    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>\n' android/app/src/main/AndroidManifest.xml
-
-      # 6. PAKSA GUDANG MAVEN CENTRAL (OBAT FFMPEG!)
-      - name: Paksa Gudang Maven Central
-        run: |
-          sed -i 's/FAIL_ON_PROJECT_REPOS/PREFER_SETTINGS/g' android/settings.gradle
-          sed -i 's/PREFER_PROJECT/PREFER_SETTINGS/g' android/settings.gradle
-          sed -i 's/mavenCentral()/mavenCentral()\n        maven { url "https:\/\/jitpack.io" }/g' android/settings.gradle
-
+      # 4. DOWNLOAD PLUGIN KE SERVER DULU
       - name: Download Semua Package (Pub Get)
         run: flutter pub get
 
+      # 5. SUNTIK NDK, MIN SDK & IZIN MEMORI
+      - name: Suntik Konfigurasi Android
+        run: |
+          sed -i 's/minSdkVersion .*/minSdkVersion 24/g' android/app/build.gradle
+          sed -i 's/ndkVersion .*/ndkVersion "27.0.12077973"/g' android/app/build.gradle
+          sed -i '/<application/i \    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>\n    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>\n    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"/>\n    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>\n' android/app/src/main/AndroidManifest.xml
+
+      # 6. JURUS BYPASS: BAJAK PLUGIN FFMPEG DARI DALAM SERVER
+      - name: Bajak Jalur Gudang FFmpeg
+        run: |
+          # Ganti semua jalur gudang mati (jcenter) jadi gudang resmi (mavenCentral) di semua plugin
+          find /home/runner/.pub-cache/hosted/pub.dev/ -name "build.gradle" -exec sed -i 's/jcenter()/mavenCentral()/g' {} +
+          # Paksa suntik jalur tambahan kalau pluginnya kosongan
+          find /home/runner/.pub-cache/hosted/pub.dev/ffmpeg_kit_flutter_min_gpl*/android -name "build.gradle" -exec sed -i 's/repositories {/repositories {\n        mavenCentral()\n        maven { url "https:\/\/jitpack.io" }/g' {} +
+
+      # 7. RAKIT APK DENGAN JALUR YANG UDAH DIBAJAK
       - name: Rakit APK Release!
         run: flutter build apk --release
 
