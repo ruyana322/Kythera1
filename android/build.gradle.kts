@@ -14,16 +14,6 @@ rootProject.layout.buildDirectory.value(newBuildDir)
 subprojects {
     val newSubprojectBuildDir: Directory = newBuildDir.dir(project.name)
     project.layout.buildDirectory.value(newSubprojectBuildDir)
-
-    // INI OBATNYA: Paksa semua plugin jadul buat naik kelas ke Kotlin 1.8 & Java 11
-    afterEvaluate {
-        tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-            kotlinOptions {
-                jvmTarget = "11"
-                languageVersion = "1.8"
-            }
-        }
-    }
 }
 
 tasks.register<Delete>("clean") {
