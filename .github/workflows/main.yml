@@ -35,23 +35,55 @@ jobs:
       - name: Bikin Ulang Android Baru
         run: flutter create --project-name kythera_flutter . --platforms=android
 
-      # 4. SUNTIK NDK & MIN SDK
-      - name: Suntik Konfigurasi Android
-        run: |
-          sed -i 's/minSdkVersion .*/minSdkVersion 24/g' android/app/build.gradle
-          sed -i 's/ndkVersion .*/ndkVersion "27.0.12077973"/g' android/app/build.gradle
-          sed -i '/<application/i \    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>\n    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>\n    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"/>\n    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>\n' android/app/src/main/AndroidManifest.xml
-
-      # 5. JURUS SONATYPE (CONTEK DARI APP WEBVIEW LAMA!)
-      - name: Buka Gudang Sonatype
-        run: |
-          sed -i 's/FAIL_ON_PROJECT_REPOS/PREFER_SETTINGS/g' android/settings.gradle || true
-          sed -i 's/PREFER_PROJECT/PREFER_SETTINGS/g' android/settings.gradle || true
-          sed -i '/mavenCentral()/a \        maven { url "https:\/\/s01.oss.sonatype.org\/content\/repositories\/releases\/" }\n        maven { url "https:\/\/jitpack.io" }' android/settings.gradle
-
+      # 4. DOWNLOAD PLUGIN 
       - name: Download Semua Package (Pub Get)
         run: flutter pub get
 
+      # 5. JURUS PYTHON: INJEKSI TOTAL ANTI-GAGAL
+      - name: Bongkar Total Gradle
+        run: |
+          python3 -c '
+          import os, re
+
+          # A. Suntik NDK & MinSDK (Wajib buat FFmpeg)
+          app_gradle = "android/app/build.gradle"
+          if os.path.exists(app_gradle):
+              with open(app_gradle, "r") as f: c = f.read()
+              c = re.sub(r"minSdkVersion\s+.*", "minSdkVersion 24", c)
+              c = re.sub(r"ndkVersion\s+.*", "ndkVersion \"27.0.12077973\"", c)
+              with open(app_gradle, "w") as f: f.write(c)
+
+          # B. Suntik Izin Memori ke Manifest
+          manifest = "android/app/src/main/AndroidManifest.xml"
+          if os.path.exists(manifest):
+              with open(manifest, "r") as f: c = f.read()
+              izin = """
+          <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+          <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+          <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"/>
+          <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
+              """
+              if "READ_EXTERNAL_STORAGE" not in c:
+                  c = c.replace("<application", izin + "\n    <application")
+              with open(manifest, "w") as f: f.write(c)
+
+          # C. Buka Gudang Sonatype (Contek App Lama lu!)
+          set_gradle = "android/settings.gradle"
+          if os.path.exists(set_gradle):
+              with open(set_gradle, "r") as f: c = f.read()
+              c = c.replace("FAIL_ON_PROJECT_REPOS", "PREFER_SETTINGS")
+              if "sonatype" not in c:
+                  c = c.replace("mavenCentral()", "mavenCentral()\n        maven { url \"https://s01.oss.sonatype.org/content/repositories/releases/\" }\n        maven { url \"https://jitpack.io\" }")
+              with open(set_gradle, "w") as f: f.write(c)
+
+          # D. Tempel Gudang di Root Build.gradle biar semua plugin kebagian
+          root_gradle = "android/build.gradle"
+          if os.path.exists(root_gradle):
+              with open(root_gradle, "a") as f:
+                  f.write("\nallprojects {\n    repositories {\n        google()\n        mavenCentral()\n        maven { url \"https://s01.oss.sonatype.org/content/repositories/releases/\" }\n        maven { url \"https://jitpack.io\" }\n    }\n}\n")
+          '
+
+      # 6. RAKIT APK RELEASE!
       - name: Rakit APK Release!
         run: flutter build apk --release
 
