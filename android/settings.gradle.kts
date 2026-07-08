@@ -29,9 +29,6 @@ dependencyResolutionManagement {
         mavenCentral()
         maven { url = uri("https://jitpack.io") }
         maven { url = uri("https://repo1.maven.org/maven2/") }
-        maven { url = uri("https://oss.sonatype.org/content/repositories/releases/") }
-        maven { url = uri("https://s01.oss.sonatype.org/content/repositories/releases/") }
-        maven { url = uri("https://storage.googleapis.com/download.flutter.io") }
     }
 }
 
