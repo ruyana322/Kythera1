@@ -14,17 +14,37 @@ jobs:
       - name: Tarik Kode dari Repo
         uses: actions/checkout@v4
 
-      - name: Siapin Java (JDK 11)
+      # 1. HANCURKAN FOLDER ANDROID ZOMBIE
+      - name: Buang Folder Android Lama
+        run: rm -rf android
+
+      # 2. SIAPIN MESIN YANG PAS (Pake Java 17 biar Gradle ngacir)
+      - name: Siapin Java
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
-          java-version: '11'
+          java-version: '17'
 
-      - name: Siapin Mesin Flutter
+      - name: Siapin Mesin Flutter 3.19.6
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.19.6' # INI OBATNYA BIAR AKUR SAMA MESIN LU
+          flutter-version: '3.19.6'
           cache: true
+
+      # 3. BIKIN ULANG ANDROID YANG 100% MULUS & V2 COMPLIANT
+      - name: Bikin Ulang Android Baru
+        run: flutter create . --platforms=android
+
+      # 4. SUNTIK NDK & MIN SDK OTOMATIS BUAT FFMPEG
+      - name: Suntik NDK 27 & Min SDK 24
+        run: |
+          sed -i 's/ndkVersion .*/ndkVersion "27.0.12077973"/g' android/app/build.gradle
+          sed -i 's/minSdkVersion .*/minSdkVersion 24/g' android/app/build.gradle
+
+      # 5. SUNTIK IZIN MEMORI OTOMATIS KE MANIFEST
+      - name: Suntik Izin Memori
+        run: |
+          sed -i '/<application/i \    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>\n    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>\n    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"/>\n    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>\n' android/app/src/main/AndroidManifest.xml
 
       - name: Download Semua Package (Pub Get)
         run: flutter pub get
