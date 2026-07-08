@@ -31,9 +31,9 @@ jobs:
           flutter-version: '3.19.6'
           cache: true
 
-      # 3. BIKIN ULANG ANDROID YANG 100% MULUS & V2 COMPLIANT
+      # 3. BIKIN ULANG ANDROID YANG 100% MULUS & V2 COMPLIANT (Pake Nama Asli)
       - name: Bikin Ulang Android Baru
-        run: flutter create . --platforms=android
+        run: flutter create --project-name kythera_flutter . --platforms=android
 
       # 4. SUNTIK NDK & MIN SDK OTOMATIS BUAT FFMPEG
       - name: Suntik NDK 27 & Min SDK 24
