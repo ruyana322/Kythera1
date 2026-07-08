@@ -39,7 +39,7 @@ jobs:
       - name: Download Semua Package (Pub Get)
         run: flutter pub get
 
-      # 5. JURUS NUKLIR: TIMPA TOTAL FILE SETTINGAN!
+      # 5. JURUS NUKLIR: TIMPA TOTAL FILE SETTINGAN (VERSI DIKTATOR!)
       - name: Tulis Ulang Konfigurasi Mutlak
         run: |
           # A. Suntik NDK & SDK 
@@ -47,7 +47,7 @@ jobs:
           sed -i 's/ndkVersion .*/ndkVersion "27.0.12077973"/g' android/app/build.gradle
           sed -i '/<application/i \    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>\n    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>\n    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"/>\n    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>\n' android/app/src/main/AndroidManifest.xml
 
-          # B. TIMPA TOTAL settings.gradle DENGAN GUDANG SONATYPE!
+          # B. TIMPA TOTAL settings.gradle DENGAN MODE PREFER_SETTINGS
           cat << 'EOF' > android/settings.gradle
           pluginManagement {
               def flutterSdkPath = {
@@ -74,7 +74,8 @@ jobs:
           }
 
           dependencyResolutionManagement {
-              repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)
+              # INI DIA KUNCI KEMENANGAN KITA KANG!
+              repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
               repositories {
                   google()
                   mavenCentral()
@@ -86,7 +87,7 @@ jobs:
           include ":app"
           EOF
 
-          # C. TIMPA TOTAL build.gradle ROOT BIA FFMPEG TUNDUK!
+          # C. TIMPA TOTAL build.gradle ROOT
           cat << 'EOF' > android/build.gradle
           allprojects {
               repositories {
