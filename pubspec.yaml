@@ -11,12 +11,12 @@ dependencies:
   flutter:
     sdk: flutter
 
-  # FFmpeg — gunakan versi min-gpl sesuai permintaan
+  # FFmpeg — community fork (arthenica original sudah dihapus dari Maven)
   ffmpeg_kit_flutter_min_gpl:
-  git:
-    url: https://github.com/arthenica/ffmpeg-kit.git
-    path: flutter/flutter_packages/ffmpeg_kit_flutter_min_gpl
-    ref: main
+    git:
+      url: https://github.com/arthenica/ffmpeg-kit.git
+      path: flutter/flutter_packages/ffmpeg_kit_flutter_min_gpl
+      ref: main
 
   # File picker untuk pilih video dari galeri
   file_picker: ^8.0.0
