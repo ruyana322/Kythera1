@@ -1,0 +1,39 @@
+name: Build Kythera APK
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build & Release APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Tarik Kode dari Repo
+        uses: actions/checkout@v4
+
+      - name: Siapin Java (JDK 11)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '11'
+
+      - name: Siapin Mesin Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Download Semua Package (Pub Get)
+        run: flutter pub get
+
+      - name: Rakit APK Release!
+        run: flutter build apk --release
+
+      - name: Upload Hasil APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Kythera-Tools-Pro-APK
+          path: build/app/outputs/flutter-apk/app-release.apk
