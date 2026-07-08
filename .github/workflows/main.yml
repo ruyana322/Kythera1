@@ -35,53 +35,80 @@ jobs:
       - name: Bikin Ulang Android Baru
         run: flutter create --project-name kythera_flutter . --platforms=android
 
-      # 4. DOWNLOAD PLUGIN 
+      # 4. DOWNLOAD PLUGIN FFMPEG
       - name: Download Semua Package (Pub Get)
         run: flutter pub get
 
-      # 5. JURUS PYTHON: INJEKSI TOTAL ANTI-GAGAL
-      - name: Bongkar Total Gradle
+      # 5. JURUS NUKLIR: TIMPA TOTAL FILE SETTINGAN!
+      - name: Tulis Ulang Konfigurasi Mutlak
         run: |
-          python3 -c '
-          import os, re
+          # A. Suntik NDK & SDK 
+          sed -i 's/minSdkVersion .*/minSdkVersion 24/g' android/app/build.gradle
+          sed -i 's/ndkVersion .*/ndkVersion "27.0.12077973"/g' android/app/build.gradle
+          sed -i '/<application/i \    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>\n    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>\n    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"/>\n    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>\n' android/app/src/main/AndroidManifest.xml
 
-          # A. Suntik NDK & MinSDK (Wajib buat FFmpeg)
-          app_gradle = "android/app/build.gradle"
-          if os.path.exists(app_gradle):
-              with open(app_gradle, "r") as f: c = f.read()
-              c = re.sub(r"minSdkVersion\s+.*", "minSdkVersion 24", c)
-              c = re.sub(r"ndkVersion\s+.*", "ndkVersion \"27.0.12077973\"", c)
-              with open(app_gradle, "w") as f: f.write(c)
+          # B. TIMPA TOTAL settings.gradle DENGAN GUDANG SONATYPE!
+          cat << 'EOF' > android/settings.gradle
+          pluginManagement {
+              def flutterSdkPath = {
+                  def properties = new Properties()
+                  file("local.properties").withInputStream { properties.load(it) }
+                  def flutterSdkPath = properties.getProperty("flutter.sdk")
+                  assert flutterSdkPath != null, "flutter.sdk not set in local.properties"
+                  return flutterSdkPath
+              }()
 
-          # B. Suntik Izin Memori ke Manifest
-          manifest = "android/app/src/main/AndroidManifest.xml"
-          if os.path.exists(manifest):
-              with open(manifest, "r") as f: c = f.read()
-              izin = """
-          <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-          <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-          <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"/>
-          <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
-              """
-              if "READ_EXTERNAL_STORAGE" not in c:
-                  c = c.replace("<application", izin + "\n    <application")
-              with open(manifest, "w") as f: f.write(c)
+              includeBuild("$flutterSdkPath/packages/flutter_tools/gradle")
 
-          # C. Buka Gudang Sonatype (Contek App Lama lu!)
-          set_gradle = "android/settings.gradle"
-          if os.path.exists(set_gradle):
-              with open(set_gradle, "r") as f: c = f.read()
-              c = c.replace("FAIL_ON_PROJECT_REPOS", "PREFER_SETTINGS")
-              if "sonatype" not in c:
-                  c = c.replace("mavenCentral()", "mavenCentral()\n        maven { url \"https://s01.oss.sonatype.org/content/repositories/releases/\" }\n        maven { url \"https://jitpack.io\" }")
-              with open(set_gradle, "w") as f: f.write(c)
+              repositories {
+                  google()
+                  mavenCentral()
+                  gradlePluginPortal()
+              }
+          }
 
-          # D. Tempel Gudang di Root Build.gradle biar semua plugin kebagian
-          root_gradle = "android/build.gradle"
-          if os.path.exists(root_gradle):
-              with open(root_gradle, "a") as f:
-                  f.write("\nallprojects {\n    repositories {\n        google()\n        mavenCentral()\n        maven { url \"https://s01.oss.sonatype.org/content/repositories/releases/\" }\n        maven { url \"https://jitpack.io\" }\n    }\n}\n")
-          '
+          plugins {
+              id "dev.flutter.flutter-plugin-loader" version "1.0.0"
+              id "com.android.application" version "7.3.0" apply false
+              id "org.jetbrains.kotlin.android" version "1.7.10" apply false
+          }
+
+          dependencyResolutionManagement {
+              repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)
+              repositories {
+                  google()
+                  mavenCentral()
+                  maven { url 'https://s01.oss.sonatype.org/content/repositories/releases/' }
+                  maven { url 'https://jitpack.io' }
+              }
+          }
+
+          include ":app"
+          EOF
+
+          # C. TIMPA TOTAL build.gradle ROOT BIA FFMPEG TUNDUK!
+          cat << 'EOF' > android/build.gradle
+          allprojects {
+              repositories {
+                  google()
+                  mavenCentral()
+                  maven { url 'https://s01.oss.sonatype.org/content/repositories/releases/' }
+                  maven { url 'https://jitpack.io' }
+              }
+          }
+
+          rootProject.buildDir = '../build'
+          subprojects {
+              project.buildDir = "${rootProject.buildDir}/${project.name}"
+          }
+          subprojects {
+              project.evaluationDependsOn(':app')
+          }
+
+          tasks.register("clean", Delete) {
+              delete rootProject.buildDir
+          }
+          EOF
 
       # 6. RAKIT APK RELEASE!
       - name: Rakit APK Release!
