@@ -33,18 +33,6 @@ android {
     }
 }
 
-// Force resolve ffmpeg-kit jika git source tidak tersedia
-configurations.all {
-    resolutionStrategy {
-        eachDependency {
-            if (requested.group == "com.arthenica" && requested.name == "ffmpeg-kit-min-gpl") {
-                useVersion("6.0-2.LTS")
-                because("arthenica 6.0-2 dihapus dari Maven, pakai LTS variant")
-            }
-        }
-    }
-}
-
 flutter {
     source = "../.."
 }
