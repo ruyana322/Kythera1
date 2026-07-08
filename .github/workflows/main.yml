@@ -23,7 +23,7 @@ jobs:
       - name: Siapin Mesin Flutter
         uses: subosito/flutter-action@v2
         with:
-          channel: 'stable'
+          flutter-version: '3.19.6' # INI OBATNYA BIAR AKUR SAMA MESIN LU
           cache: true
 
       - name: Download Semua Package (Pub Get)
