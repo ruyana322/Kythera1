@@ -35,28 +35,28 @@ jobs:
       - name: Bikin Ulang Android Baru
         run: flutter create --project-name kythera_flutter . --platforms=android
 
-      # 4. SUNTIK NDK & MIN SDK (Target: File .kts)
+      # 4. SUNTIK NDK & MIN SDK (Balik ke Groovy!)
       - name: Suntik NDK & Min SDK
         run: |
-          sed -i 's/minSdk = .*/minSdk = 24/g' android/app/build.gradle.kts
-          sed -i 's/ndkVersion = .*/ndkVersion = "27.0.12077973"/g' android/app/build.gradle.kts
+          sed -i 's/minSdkVersion .*/minSdkVersion 24/g' android/app/build.gradle
+          sed -i 's/ndkVersion .*/ndkVersion "27.0.12077973"/g' android/app/build.gradle
 
       # 5. SUNTIK IZIN MEMORI
       - name: Suntik Izin Memori
         run: |
           sed -i '/<application/i \    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>\n    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>\n    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"/>\n    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>\n' android/app/src/main/AndroidManifest.xml
 
-      # 6. BUKA GEMBOK GUDANG FFMPEG (Target: File .kts)
+      # 6. BUKA GEMBOK GUDANG FFMPEG (Versi Groovy!)
       - name: Buka Gembok Gudang FFmpeg
         run: |
-          sed -i 's/FAIL_ON_PROJECT_REPOS/PREFER_PROJECT/g' android/settings.gradle.kts
-          cat <<EOF >> android/build.gradle.kts
+          sed -i 's/FAIL_ON_PROJECT_REPOS/PREFER_PROJECT/g' android/settings.gradle || true
+          cat <<EOF >> android/build.gradle
           
           allprojects {
               repositories {
                   google()
                   mavenCentral()
-                  maven { url = uri("https://jitpack.io") }
+                  maven { url 'https://jitpack.io' }
               }
           }
           EOF
